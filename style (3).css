@@ -1,0 +1,557 @@
+/* ==========================================================================
+   1. RESET Y BASE
+   ========================================================================== */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+  background: #12121f; 
+  color: #e8e8f0; 
+  overflow-x: hidden; 
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. HEADER Y STATS
+   ========================================================================== */
+header { 
+  text-align: center; 
+  padding: 18px 16px 8px; 
+}
+
+header h1 { 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #fff; 
+  letter-spacing: -0.3px;
+}
+
+header p { 
+  font-size: 12px; 
+  color: #8a8a9e; 
+  margin-top: 4px; 
+}
+
+.stats { 
+  display: flex; 
+  gap: 10px; 
+  justify-content: center; 
+  padding: 8px 16px 16px; 
+  flex-wrap: wrap; 
+}
+
+.stat { 
+  background: #1a1a2e; 
+  border: 1px solid #252538;
+  padding: 8px 14px; 
+  border-radius: 8px; 
+  font-size: 11px; 
+  color: #8a8a9e; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
+  min-width: 90px;
+}
+
+.stat strong { 
+  display: block; 
+  font-size: 16px; 
+  color: #fff; 
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+/* ==========================================================================
+   3. TOGGLES (CÁMARA Y SUBMODOS)
+   ========================================================================== */
+.toggles-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+/* Cámara / Senado — píldora grande */
+.chamber-toggle {
+  display: inline-flex;
+  gap: 0;
+  background: #0e0e1e;
+  border: 1px solid #2a2a40;
+  border-radius: 999px;
+  padding: 4px;
+}
+.chamber-toggle button {
+  background: transparent;
+  border: 0;
+  color: #777;
+  padding: 9px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+}
+.chamber-toggle button:hover { background: #1e1e30; color: #ccc; }
+.chamber-toggle button.active { 
+  background: #252540; 
+  color: #fff; 
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Hemiciclo / Mapa — píldora pequeña */
+.submode-toggle {
+  display: inline-flex;
+  gap: 0;
+  background: #16162e;
+  border: 1px solid #23233c;
+  border-radius: 999px;
+  padding: 3px;
+}
+.submode-toggle button {
+  background: transparent;
+  border: 0;
+  color: #666;
+  padding: 6px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.submode-toggle button:hover { background: #1e1e30; color: #aaa; }
+.submode-toggle button.active { 
+  background: #23233c; 
+  color: #e8e8f0; 
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ==========================================================================
+   4. LAYOUT PRINCIPAL (GRID) Y SUBMODOS
+   ========================================================================== */
+#national-view, #dept-view { 
+  max-width: 1300px; 
+  margin: 0 auto; 
+  padding: 0 16px 20px; 
+}
+
+#dept-view { display: none; }
+
+/* Grid base Responsivo */
+.nat-grid, .dept-grid { 
+  display: grid; 
+  grid-template-columns: 1fr; 
+  gap: 16px; 
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .nat-grid, .dept-grid { 
+    grid-template-columns: 1fr 420px; 
+  }
+}
+
+.right-panel { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+  min-height: 0;
+}
+
+/* Lógica: MODO HEMICICLO */
+#national-view.view-mode-hemi #map-wrap { display: none; }
+#national-view.view-mode-hemi #table-wrap { display: none; }
+#national-view.view-mode-hemi .nat-grid { 
+  max-width: none; 
+}
+#national-view.view-mode-hemi .right-panel { display: contents; }
+
+@media (min-width: 900px) {
+  #national-view.view-mode-hemi .nat-grid {
+    grid-template-columns: minmax(0, 800px) 420px;
+    justify-content: center;
+  }
+}
+
+/* Lógica: MODO MAPA */
+#national-view.view-mode-map #hemi-wrap { display: none; }
+#national-view.view-mode-map #legend-wrap { display: none; }
+#national-view.view-mode-map .right-panel { display: none; } /* Oculta el panel derecho entero */
+#national-view.view-mode-map #table-wrap { display: flex; } /* Asegura que la tabla se vea */
+
+/* ==========================================================================
+   5. CONTENEDORES (PANELES)
+   ========================================================================== */
+#map-wrap, #hemi-wrap, #legend-wrap, #table-wrap, #dept-map-wrap, #dept-hemi-wrap, #dept-results-wrap {
+  background: #1a1a2e; 
+  border: 1px solid #2a2a40; 
+  border-radius: 12px; 
+  padding: 16px; 
+}
+
+#table-wrap h2, #hemi-wrap h2, #legend-wrap h2, #dept-hemi-wrap h2, #dept-results-wrap h2 { 
+  font-size: 11px; 
+  font-weight: 700; 
+  color: #8a8a9e; 
+  letter-spacing: 0.8px; 
+  text-transform: uppercase; 
+  margin-bottom: 14px; 
+}
+
+#hemi-wrap h2, #dept-hemi-wrap h2 { text-align: center; margin-bottom: 6px; }
+
+#map-wrap svg, #dept-map-wrap svg { display: block; width: 100%; height: auto; }
+#hemi-svg, #dept-hemi-svg { display: block; width: 100%; height: auto; }
+
+#map-wrap, #hemi-wrap, #table-wrap, #legend-wrap {
+  min-height: 0;
+}
+
+#table-wrap, #legend-wrap {
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   6. TABLA DE DEPARTAMENTOS (MODO MAPA)
+   ========================================================================== */
+#table-wrap { 
+  display: flex; 
+  flex-direction: column; 
+}
+
+@media (max-width: 899px) {
+  #table-wrap, #legend-wrap {
+    max-height: calc(100vh - 260px);
+  }
+}
+
+.table-inner { 
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto; 
+  padding-right: 4px;
+}
+
+/* Scrollbar Personalizado */
+.table-inner::-webkit-scrollbar { width: 6px; }
+.table-inner::-webkit-scrollbar-track { background: transparent; }
+.table-inner::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 10px; }
+.table-inner::-webkit-scrollbar-thumb:hover { background: #3a3a54; }
+
+#dept-table { 
+  width: 100%; 
+  border-collapse: separate; 
+  border-spacing: 0 6px; 
+  margin-top: -6px;
+}
+
+/* Sticky Header */
+#dept-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#dept-table th { 
+  background: #1a1a2e; /* Mismo que #table-wrap para ocultar lo que pasa por debajo */
+  color: #777; 
+  font-weight: 700; 
+  letter-spacing: 0.05em; 
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 2px solid #23233c;
+}
+
+#dept-table .dept-section-row {
+  background: transparent;
+  cursor: default;
+}
+
+#dept-table .dept-section-row:hover {
+  background: transparent;
+  transform: none;
+}
+
+#dept-table .dept-section-row td {
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a40;
+  border-radius: 0;
+  color: #8a8a9e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 14px 12px 8px;
+  text-transform: uppercase;
+}
+
+#dept-table .dept-section-row td:first-child,
+#dept-table .dept-section-row td:last-child {
+  border-radius: 0;
+  font-weight: 800;
+}
+
+/* Filas Flotantes */
+#dept-table tbody tr { 
+  background: #22223a; 
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+#dept-table tbody tr:hover { 
+  background: #2a2a45; 
+  transform: translateX(4px);
+}
+
+#dept-table td { 
+  padding: 12px; 
+  font-size: 13px;
+  color: #e8e8f0;
+  vertical-align: middle;
+}
+
+#dept-table td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; font-weight: 500; }
+#dept-table td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+/* Detalles de Partido en la tabla */
+.tbl-party { display: inline-flex; align-items: center; gap: 8px; }
+.tbl-logo { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; object-fit: contain; }
+.tbl-swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+/* ==========================================================================
+   7. LISTA DE LEYENDA Y RESULTADOS DEP (BARRAS DE PORCENTAJE)
+   ========================================================================== */
+#legend-list, #dept-results-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+#legend-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+#legend-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+#legend-list::-webkit-scrollbar { width: 6px; }
+#legend-list::-webkit-scrollbar-track { background: transparent; }
+#legend-list::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 10px; }
+#legend-list::-webkit-scrollbar-thumb:hover { background: #3a3a54; }
+
+.leg-row, .dr-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  padding: 8px 12px; 
+  background: #22223a; 
+  border-radius: 8px; 
+  transition: background 0.15s ease;
+}
+
+.leg-row { cursor: pointer; }
+.leg-row:hover, .leg-row.active { background: #2a2a45; }
+
+.leg-logo, .dr-logo { width: 22px; height: 22px; object-fit: contain; border-radius: 4px; flex-shrink: 0; }
+.leg-dot, .dr-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+.leg-name, .dr-name { 
+  font-size: 12px; 
+  font-weight: 500;
+  color: #ccc; 
+  flex: 1; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.leg-row.active .leg-name { color: #fff; font-weight: 600; }
+
+.leg-bar-bg, .dr-bar-bg { 
+  flex: 0 0 70px; 
+  background: #12121f; 
+  border-radius: 4px; 
+  height: 5px; 
+  overflow: visible; 
+  position: relative;
+}
+
+.leg-bar, .dr-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+.leg-bar-bg::before, .dr-bar-bg::before,
+.leg-bar-bg::after, .dr-bar-bg::after {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 20;
+}
+
+.leg-bar-bg::before, .dr-bar-bg::before {
+  content: "";
+  border: 5px solid transparent;
+  border-bottom-color: #f4f4fb;
+  top: 6px;
+  transform: translate(-50%, 2px);
+}
+
+.leg-bar-bg::after, .dr-bar-bg::after {
+  content: attr(data-tip);
+  background: #f4f4fb;
+  border: 1px solid rgba(255,255,255,0.24);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+  color: #141424;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 6px 8px;
+  top: 16px;
+  transform: translate(-50%, 2px);
+  white-space: nowrap;
+}
+
+.leg-bar-bg:hover::before, .dr-bar-bg:hover::before,
+.leg-bar-bg:hover::after, .dr-bar-bg:hover::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.leg-seats, .dr-seats { 
+  font-size: 14px; 
+  font-weight: 700; 
+  color: #fff; 
+  width: 24px; 
+  text-align: right; 
+  flex-shrink: 0; 
+}
+
+/* ==========================================================================
+   8. ESTADOS INTERACTIVOS DEL MAPA (SVG)
+   ========================================================================== */
+#map-wrap svg path { 
+  stroke: #12121f; 
+  stroke-width: 0.5; 
+  cursor: pointer; 
+  transition: opacity 0.15s, stroke-width 0.15s; 
+}
+
+#map-wrap svg path:hover { 
+  opacity: 0.85; 
+  stroke: #fff; 
+  stroke-width: 1.2; 
+}
+
+#map-wrap svg path.dimmed { opacity: 0.15; }
+#map-wrap svg path.highlighted { opacity: 1 !important; stroke: #fff; stroke-width: 2; }
+
+/* ==========================================================================
+   9. VISTA DEPARTAMENTAL ESPECÍFICA (#dept-view)
+   ========================================================================== */
+#dept-view { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.dept-grid {
+  align-items: start;
+}
+
+.dept-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dept-header { 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  margin-bottom: 16px; 
+  padding-top: 4px; 
+}
+
+.back-btn { 
+  background: #1e1e30; 
+  border: 1px solid #2a2a40; 
+  border-radius: 8px; 
+  padding: 8px 16px; 
+  font-size: 13px; 
+  font-weight: 500;
+  color: #ccc; 
+  cursor: pointer; 
+  transition: background 0.15s, color 0.15s; 
+  flex-shrink: 0; 
+}
+.back-btn:hover { background: #2a2a40; color: #fff; }
+
+.dept-title { font-size: 20px; font-weight: 700; color: #fff; }
+.dept-subtitle { font-size: 12px; color: #8a8a9e; margin-top: 2px; }
+
+#dept-map-wrap { position: relative; align-self: start; width: 100%; }
+#dept-map-wrap svg path { stroke: #12121f; stroke-width: 0.5; transition: opacity 0.15s; }
+#dept-map-wrap svg path.dept-active { stroke: #fff !important; stroke-width: 2 !important; filter: brightness(1.15); }
+#dept-map-wrap svg path:not(.dept-active) { opacity: 0.12; }
+
+/* ==========================================================================
+   10. TOOLTIPS
+   ========================================================================== */
+#tooltip { 
+  position: fixed; 
+  background: rgba(26, 26, 46, 0.95); 
+  backdrop-filter: blur(6px);
+  border: 1px solid #2a2a40; 
+  border-radius: 10px; 
+  padding: 12px 14px; 
+  pointer-events: none; 
+  z-index: 999; 
+  display: none; 
+  min-width: 190px; 
+  max-width: 240px; 
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6); 
+}
+
+#tooltip h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+.tt-total { font-size: 11px; color: #8a8a9e; margin-bottom: 8px; border-bottom: 1px solid #2a2a40; padding-bottom: 6px; }
+.tt-row { display: flex; align-items: center; gap: 7px; margin: 4px 0; }
+.tt-sw { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tt-name { font-size: 12px; color: #ccc; flex: 1; }
+.tt-seats { font-size: 13px; font-weight: 700; color: #fff; }
+.tt-bar-wrap { height: 4px; background: #12121f; border-radius: 2px; margin-top: 2px; overflow: hidden; }
+.tt-bar { height: 100%; border-radius: 2px; }
+.tt-hint { font-size: 10px; color: #666; margin-top: 10px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+
+/* Tooltip especial del Hemiciclo */
+#hemi-tooltip { 
+  position: fixed; 
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(6px);
+  border: 1px solid #2a2a40; 
+  border-radius: 12px; 
+  padding: 14px 16px 12px; 
+  pointer-events: none; 
+  z-index: 1000; 
+  display: none; 
+  text-align: center; 
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6); 
+  min-width: 140px; 
+}
+#hemi-tooltip img { width: 60px; height: 60px; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto 8px; }
+#hemi-tooltip .ht-name { font-size: 12px; font-weight: 500; color: #ccc; margin-bottom: 6px; line-height: 1.3; }
+#hemi-tooltip .ht-seats { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; }
+#hemi-tooltip .ht-label { font-size: 10px; color: #777; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;}
